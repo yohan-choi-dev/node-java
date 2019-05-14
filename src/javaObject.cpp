@@ -7,7 +7,7 @@
 
 /*static*/ std::map<std::string, Nan::Persistent<v8::FunctionTemplate>*> JavaObject::sFunctionTemplates;
 
-/*static*/ void JavaObject::Init(v8::Handle<v8::Object> target) {
+/*static*/ void JavaObject::Init(v8::Local<v8::Object> target) {
 }
 
 /*static*/ v8::Local<v8::Object> JavaObject::New(Java *java, jobject obj) {
@@ -69,7 +69,7 @@
 
       if (java->DoPromise()) {
         v8::Local<v8::Object> recv = Nan::New<v8::Object>();
-        v8::Local<v8::Value> argv[] = { methodCallTemplate->GetFunction() };
+        v8::Local<v8::Value> argv[] = { Nan::GetFunction(methodCallTemplate) };
         v8::Local<v8::Value> result = promisify->Call(recv, 1, argv);
         if (!result->IsFunction()) {
           fprintf(stderr, "Promisified result is not a function -- asyncOptions.promisify must return a function.\n");
@@ -209,7 +209,7 @@ NAN_METHOD(JavaObject::methodCallSync) {
 NAN_METHOD(JavaObject::methodCallPromise) {
   Nan::HandleScope scope;
   v8::Local<v8::Function> fn = info.Data().As<v8::Function>();
-  v8::Handle<v8::Value>* argv = new v8::Handle<v8::Value>[info.Length()];
+  v8::Local<v8::Value>* argv = new v8::Local<v8::Value>[info.Length()];
   for (int i = 0 ; i < info.Length(); i++) {
     argv[i] = info[i];
   }
@@ -345,7 +345,7 @@ NAN_INDEX_GETTER(JavaObject::indexGetter) {
 v8::Local<v8::Object> JavaProxyObject::New(Java *java, jobject obj, DynamicProxyData* dynamicProxyData) {
   Nan::EscapableHandleScope scope;
 
-  v8::Local<v8::Function> ctor = Nan::New(s_proxyCt)->GetFunction();
+  v8::Local<v8::Function> ctor = Nan::GetFunction(Nan::New(s_proxyCt));
   v8::Local<v8::Object> javaObjectObj = Nan::NewInstance(ctor).ToLocalChecked();
   SetHiddenValue(javaObjectObj, Nan::New<v8::String>(V8_HIDDEN_MARKER_JAVA_OBJECT).ToLocalChecked(), Nan::New<v8::Boolean>(true));
   JavaProxyObject *self = new JavaProxyObject(java, obj, dynamicProxyData);

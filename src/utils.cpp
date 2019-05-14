@@ -644,7 +644,7 @@ v8::Local<v8::Value> javaArrayToV8(Java* java, JNIEnv* env, jobjectArray objArra
   default:
     for(jsize i=0; i<arraySize; i++) {
         jobject obj = env->GetObjectArrayElement(objArray, i);
-        v8::Handle<v8::Value> item = javaToV8(java, env, obj);
+        v8::Local<v8::Value> item = javaToV8(java, env, obj);
         result->Set(i, item);
     }
     break;
